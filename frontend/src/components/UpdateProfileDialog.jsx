@@ -19,8 +19,9 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         email: user?.email || "",
         phoneNumber: user?.phoneNumber || "",
         bio: user?.profile?.bio || "",
-        skills: user?.profile?.skills?.map(skill => skill) || "",
-        file: user?.profile?.resume || ""
+        skills: user?.profile?.skills?.join(", ") || "",
+        file: null,
+        profilePhoto: null
     });
     const dispatch = useDispatch();
 
@@ -29,8 +30,8 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     }
 
     const fileChangeHandler = (e) => {
-        const file = e.target.files?.[0];
-        setInput({ ...input, file })
+        const { name, files } = e.target;
+        setInput({ ...input, [name]: files[0] });
     }
 
     const submitHandler = async (e) => {
@@ -44,6 +45,10 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         if (input.file) {
             formData.append("file", input.file);
         }
+        if (input.profilePhoto) {
+            formData.append("profilePhoto", input.profilePhoto);
+        }
+
         try {
             setLoading(true);
             const res = await axios.post(`${USER_API_END_POINT}/profile/update`, formData, {
@@ -63,10 +68,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
             setLoading(false);
         }
         setOpen(false);
-        console.log(input);
     }
-
-
 
     return (
         <div>
@@ -81,7 +83,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                 <Label htmlFor="name" className="text-right">Name</Label>
                                 <Input
                                     id="name"
-                                    name="name"
+                                    name="fullname" // Corrected name attribute
                                     type="text"
                                     value={input.fullname}
                                     onChange={changeEventHandler}
@@ -103,7 +105,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                 <Label htmlFor="number" className="text-right">Number</Label>
                                 <Input
                                     id="number"
-                                    name="number"
+                                    name="phoneNumber" // Corrected name attribute
                                     value={input.phoneNumber}
                                     onChange={changeEventHandler}
                                     className="col-span-3"
@@ -126,6 +128,17 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                     name="skills"
                                     value={input.skills}
                                     onChange={changeEventHandler}
+                                    className="col-span-3"
+                                />
+                            </div>
+                            <div className='grid grid-cols-4 items-center gap-4'>
+                                <Label htmlFor="profile-photo" className="text-right">Photo</Label>
+                                <Input
+                                    id="profile-photo"
+                                    name="profilePhoto"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={fileChangeHandler}
                                     className="col-span-3"
                                 />
                             </div>
